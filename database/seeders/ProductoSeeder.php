@@ -9,64 +9,60 @@ use StaticKidz\BedcaAPI\BedcaClient;
 
 class ProductoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $client = new BedcaClient();
         $categorias = Categoria::all();
 
-        // Por cada categoría, obtenemos algunos alimentos
         foreach ($categorias as $categoria) {
-            try {
-                $foods = $client->getFoodsInGroup($categoria->codigo);
+            $foods = $client->getFoodsInGroup($categoria->codigo);
+            
+            if (isset($foods->food) && is_array($foods->food)) {
+                $foodsLimited = array_slice($foods->food, 0, 10);
                 
-                if (isset($foods->food) && is_array($foods->food)) {
-                    // Limitamos a 20 productos por categoría para no saturar
-                    $foodsLimited = array_slice($foods->food, 0, 20);
-                    
-                    foreach ($foodsLimited as $food) {
-                        // Obtenemos los detalles completos del alimento
+                foreach ($foodsLimited as $food) {
+                    try {
                         $foodDetail = $client->getFood($food->f_id);
                         
-                        if (isset($foodDetail->foodvalue)) {
+                        if (isset($foodDetail->food->foodvalue)) {
+                            $foodvalue = $foodDetail->food->foodvalue;
+                            
                             Producto::create([
                                 'nombre' => $food->f_ori_name ?? $food->f_eng_name,
                                 'categoria_id' => $categoria->id,
-                                'user_id' => null, // Producto predefinido
+                                'user_id' => null,
                                 'es_personalizado' => false,
-                                'calorias' => $this->getComponent($foodDetail->foodvalue, 'ENERC_'),
-                                'grasa_total' => $this->getComponent($foodDetail->foodvalue, 'FAT'),
-                                'grasa_saturada' => $this->getComponent($foodDetail->foodvalue, 'FASAT'),
-                                'grasa_monoinsaturada' => $this->getComponent($foodDetail->foodvalue, 'FAMS'),
-                                'grasa_poliinsaturada' => $this->getComponent($foodDetail->foodvalue, 'FAPU'),
-                                'grasa_trans' => $this->getComponent($foodDetail->foodvalue, 'FATRN'),
-                                'colesterol' => $this->getComponent($foodDetail->foodvalue, 'CHOLE'),
-                                'carbohidratos' => $this->getComponent($foodDetail->foodvalue, 'CHOAVL'),
-                                'fibra' => $this->getComponent($foodDetail->foodvalue, 'FIBTG'),
-                                'proteinas' => $this->getComponent($foodDetail->foodvalue, 'PROT'),
+                                'calorias' => $this->getComponent($foodvalue, 409),
+                                'grasa_total' => $this->getComponent($foodvalue, 410),
+                                'grasa_saturada' => $this->getComponent($foodvalue, 299),
+                                'grasa_monoinsaturada' => $this->getComponent($foodvalue, 282),
+                                'grasa_poliinsaturada' => $this->getComponent($foodvalue, 287),
+                                'grasa_trans' => 0,
+                                'colesterol' => $this->getComponent($foodvalue, 433),
+                                'carbohidratos' => $this->getComponent($foodvalue, 53),
+                                'fibra' => $this->getComponent($foodvalue, 307),
+                                'proteinas' => $this->getComponent($foodvalue, 416),
                             ]);
                         }
                         
-                        // Pequeña pausa para no saturar la API
-                        usleep(100000); // 0.1 segundos
+                        usleep(100000);
+                    } catch (\Exception $e) {
+                        // Silenciar errores
                     }
                 }
-            } catch (\Exception $e) {
-                $this->command->warn("Error al cargar productos de categoría {$categoria->nombre}: " . $e->getMessage());
             }
         }
     }
 
-    /**
-     * Obtiene el valor de un componente nutricional
-     */
-    private function getComponent($foodvalues, $componentCode): float
+    private function getComponent($foodvalues, $componentId): float
     {
         foreach ($foodvalues as $value) {
-            if (isset($value->c_id) && str_starts_with($value->c_id, $componentCode)) {
-                return floatval($value->best_location ?? 0);
+            if (isset($value->c_id) && $value->c_id == $componentId) {
+                // Si best_location es un objeto o no es numérico, devolver 0
+                if (is_object($value->best_location) || !is_numeric($value->best_location)) {
+                    return 0.0;
+                }
+                return floatval($value->best_location);
             }
         }
         return 0.0;
