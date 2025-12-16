@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -44,5 +45,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function productos(): HasMany
+    {
+        return $this->hasMany(Producto::class);
+    }
+
+    public function platos(): HasMany
+    {
+        return $this->hasMany(Plato::class);
+    }
+
+    public function menus(): HasMany
+    {
+        return $this->hasMany(Menu::class);
     }
 }
