@@ -80,6 +80,15 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button 
+                                                wire:click="toggleFavorito({{ $producto->id }})" 
+                                                class="mr-3 text-xl hover:scale-110 transition-transform">
+                                                @if(auth()->user()->esFavorito('producto', $producto->id))
+                                                    ⭐
+                                                @else
+                                                    ☆
+                                                @endif
+                                            </button>
                                             @if($producto->es_personalizado && $producto->user_id === auth()->id())
                                                 <a href="{{ route('productos.edit', $producto) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
                                                 <button wire:click="eliminar({{ $producto->id }})" 

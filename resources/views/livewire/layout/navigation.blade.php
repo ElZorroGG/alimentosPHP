@@ -36,6 +36,12 @@ new class extends Component
                     <x-nav-link :href="route('productos.index')" :active="request()->routeIs('productos.*')" wire:navigate>
                         Productos
                     </x-nav-link>
+                    <x-nav-link :href="route('platos.index')" :active="request()->routeIs('platos.*')" wire:navigate>
+                        Platos
+                    </x-nav-link>
+                    <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')" wire:navigate>
+                        Calendario
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -89,6 +95,12 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('productos.index')" :active="request()->routeIs('productos.*')" wire:navigate>
                 Productos
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('platos.index')" :active="request()->routeIs('platos.*')" wire:navigate>
+                Platos
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')" wire:navigate>
+                Calendario
             </x-responsive-nav-link>
         </div>
 

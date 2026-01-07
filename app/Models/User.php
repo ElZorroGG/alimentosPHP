@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'objetivo_calorias',
+        'objetivo_proteinas',
+        'objetivo_carbohidratos',
+        'objetivo_grasas',
     ];
 
     /**
@@ -60,5 +64,15 @@ class User extends Authenticatable
     public function menus(): HasMany
     {
         return $this->hasMany(Menu::class);
+    }
+
+    public function favoritos(): HasMany
+    {
+        return $this->hasMany(Favorito::class);
+    }
+
+    public function esFavorito($tipo, $id)
+    {
+        return $this->favoritos()->where('tipo_favorito', $tipo)->where('favorito_id', $id)->exists();
     }
 }
