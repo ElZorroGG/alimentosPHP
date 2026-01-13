@@ -51,13 +51,15 @@ class Index extends Component
         $fin = $inicio->copy()->endOfWeek();
 
         // Obtener todos los menús de la semana
-        $menus = Menu::where('user_id', auth()->id())
+        $menusCollection = Menu::where('user_id', auth()->id())
             ->whereBetween('fecha', [$inicio->format('Y-m-d'), $fin->format('Y-m-d')])
-            ->with('plato')
-            ->get()
-            ->groupBy(function($menu) {
-                return $menu->fecha . '-' . $menu->tipo_comida;
-            });
+            ->with('plato.productos')
+            ->get();
+        
+        $menus = $menusCollection->mapWithKeys(function($menu) {
+            $fechaFormateada = \Carbon\Carbon::parse($menu->fecha)->format('Y-m-d');
+            return [$fechaFormateada . '-' . $menu->tipo_comida => $menu];
+        });
 
         // Generar estructura de la semana
         $dias = [];

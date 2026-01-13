@@ -70,7 +70,7 @@
                                                 $menu = $menus->get($clave);
                                             @endphp
                                             <td class="border border-gray-300 px-2 py-2 text-center align-top {{ $dia['esHoy'] ? 'bg-blue-50' : '' }}">
-                                                @if($menu)
+                                                @if($menu && $menu->plato)
                                                     <div class="bg-green-100 rounded p-2 text-xs">
                                                         <div class="font-semibold mb-1">{{ $menu->plato->nombre }}</div>
                                                         @php
@@ -133,7 +133,7 @@
                                     foreach($tiposComida as $tipo) {
                                         $clave = $dia['fecha'] . '-' . $tipo;
                                         $menu = $menus->get($clave);
-                                        if ($menu) {
+                                        if ($menu && $menu->plato) {
                                             foreach($menu->plato->productos as $producto) {
                                                 $factor = $producto->pivot->cantidad_gramos / 100;
                                                 $totalDia['calorias'] += $producto->calorias * $factor;

@@ -22,7 +22,9 @@ class ExportController extends Controller
             ->orderByRaw("FIELD(tipo_comida, 'desayuno', 'almuerzo', 'comida', 'merienda', 'cena')")
             ->get();
 
-        $menusAgrupados = $menus->groupBy('fecha');
+        $menusAgrupados = $menus->groupBy(function($menu) {
+            return Carbon::parse($menu->fecha)->format('Y-m-d');
+        });
 
         $totalesSemana = [
             'calorias' => 0,
