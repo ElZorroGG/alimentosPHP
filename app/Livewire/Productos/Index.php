@@ -62,6 +62,11 @@ class Index extends Component
 
         if ($this->soloMios) {
             $query->where('user_id', auth()->id());
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('user_id')
+                  ->orWhere('user_id', auth()->id());
+            });
         }
 
         if ($this->search) {
