@@ -7,6 +7,8 @@
             <a href="{{ route('objetivos.edit') }}" class="text-sm bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
                 ⚙️ Configurar Objetivos
             </a>
+            <a href="{{ route('VerDatosAdmin.index') }}" class="text-sm bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                📅 Ver datos
         </div>
     </x-slot>
 
