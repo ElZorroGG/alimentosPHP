@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminStatsController;
 
 Route::view('/', 'welcome');
 
@@ -36,6 +37,11 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/objetivos', \App\Livewire\Objetivos\Form::class)->name('objetivos.edit');
 });
+
+// Ruta estadisticas de los admin
+    Route::get('/admin/stats', [AdminStatsController::class, 'index'])
+        ->middleware(['auth', '\\Spatie\\Permission\\Middleware\\RoleMiddleware:admin'])
+        ->name('admin.stats');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/exportar/semana', [\App\Http\Controllers\ExportController::class, 'exportarSemana'])->name('exportar.semana');

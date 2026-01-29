@@ -18,10 +18,10 @@ class CategoriaSeeder extends Seeder
 
         if (isset($foodGroups->food)) {
             foreach ($foodGroups->food as $group) {
-                Categoria::create([
-                    'nombre' => $group->fg_ori_name,
-                    'codigo' => $group->fg_id,
-                ]);
+                Categoria::firstOrCreate(
+                    ['codigo' => $group->fg_id],
+                    ['nombre' => $group->fg_ori_name]
+                );
             }
         }
     }
