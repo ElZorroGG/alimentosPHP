@@ -89,13 +89,15 @@
                                                     ☆
                                                 @endif
                                             </button>
-                                            @if($producto->es_personalizado && $producto->user_id === auth()->id())
+                                            @if(auth()->user()->hasRole('admin') || $producto->es_personalizado && $producto->user_id === auth()->id() || is_null($producto->user_id))
                                                 <a href="{{ route('productos.edit', $producto) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
-                                                <button wire:click="eliminar({{ $producto->id }})" 
-                                                    wire:confirm="¿Estás seguro de eliminar este producto?"
-                                                    class="text-red-600 hover:text-red-900">
-                                                    Eliminar
-                                                </button>
+                                                @if(auth()->user()->hasRole('admin') || ($producto->es_personalizado && $producto->user_id === auth()->id()))
+                                                    <button wire:click="eliminar({{ $producto->id }})" 
+                                                        wire:confirm="¿Estás seguro de eliminar este producto?"
+                                                        class="text-red-600 hover:text-red-900">
+                                                        Eliminar
+                                                    </button>
+                                                @endif
                                             @else
                                                 <span class="text-gray-400">-</span>
                                             @endif
