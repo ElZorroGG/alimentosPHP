@@ -41,8 +41,16 @@ class Form extends Component
     {
         if ($id) {
             $producto = Producto::findOrFail($id);
+            $user = auth()->user();
             
-            if ($producto->user_id !== auth()->id()) {
+            if (!$user->can('productos.update')) {
+                abort(403, 'No tienes permiso para editar productos.');
+            }
+            
+            $esProductoAPI = is_null($producto->user_id);
+            $esPropietario = $producto->user_id === $user->id;
+            
+            if (!$user->hasRole('admin') && !$esProductoAPI && !$esPropietario) {
                 abort(403, 'No tienes permiso para editar este producto.');
             }
             

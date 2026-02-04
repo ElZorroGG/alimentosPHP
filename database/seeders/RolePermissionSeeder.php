@@ -27,18 +27,18 @@ class RolePermissionSeeder extends Seeder
             'menus.delete',
         ];
 
-        foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $user = Role::firstOrCreate(['name' => 'user']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $alumnoRole = Role::firstOrCreate(['name' => 'alumno']);
 
-        $admin->givePermissionTo(Permission::all());
+        $adminRole->syncPermissions(Permission::all());
 
-        $userPerms = Permission::all()->filter(function ($p) {
+        $alumnoPermissions = Permission::all()->filter(function ($p) {
             return $p->name !== 'productos.delete';
         });
-        $user->syncPermissions($userPerms->pluck('name')->all());
+        $alumnoRole->syncPermissions($alumnoPermissions);
     }
 }

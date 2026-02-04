@@ -23,9 +23,15 @@ class Index extends Component
     public function eliminar($id)
     {
         $producto = Producto::findOrFail($id);
+        $user = auth()->user();
         
-        if ($producto->user_id !== auth()->id()) {
-            session()->flash('error', 'No tienes permiso para eliminar este producto.');
+        if (!$user->can('productos.delete')) {
+            session()->flash('error', 'No tienes permiso para eliminar productos.');
+            return;
+        }
+        
+        if (!$user->hasRole('admin') && $producto->user_id !== $user->id) {
+            session()->flash('error', 'Solo puedes eliminar tus propios productos.');
             return;
         }
         

@@ -7,9 +7,6 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
@@ -17,11 +14,6 @@ class DatabaseSeeder extends Seeder
             CreateUsersSeeder::class,
             CategoriaSeeder::class,
             ProductoSeeder::class,
-        ]);
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
         ]);
     }
 }

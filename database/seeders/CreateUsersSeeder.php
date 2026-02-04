@@ -4,16 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class CreateUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::firstOrCreate(['name' => 'admin']);
-        Role::firstOrCreate(['name' => 'alumno']);
-
         $admin = User::firstOrCreate([
             'email' => 'admin@example.com',
         ], [
