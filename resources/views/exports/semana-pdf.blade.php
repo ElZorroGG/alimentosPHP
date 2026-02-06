@@ -127,19 +127,21 @@
                 @foreach($dia['menus'] as $menu)
                     <div class="comida">
                         <span class="comida-tipo">{{ ucfirst($menu->tipo_comida) }}:</span>
-                        <span class="plato-nombre">{{ $menu->plato->nombre }}</span>
+                        <span class="plato-nombre">{{ $menu->platos->pluck('nombre')->join(', ') }}</span>
                         
                         @php
                             $calorias = 0;
                             $proteinas = 0;
                             $carbos = 0;
                             $grasas = 0;
-                            foreach($menu->plato->productos as $producto) {
-                                $factor = $producto->pivot->cantidad_gramos / 100;
-                                $calorias += $producto->calorias * $factor;
-                                $proteinas += $producto->proteinas * $factor;
-                                $carbos += $producto->carbohidratos * $factor;
-                                $grasas += $producto->grasa_total * $factor;
+                            foreach($menu->platos as $platoItem) {
+                                foreach($platoItem->productos as $producto) {
+                                    $factor = $producto->pivot->cantidad_gramos / 100;
+                                    $calorias += $producto->calorias * $factor;
+                                    $proteinas += $producto->proteinas * $factor;
+                                    $carbos += $producto->carbohidratos * $factor;
+                                    $grasas += $producto->grasa_total * $factor;
+                                }
                             }
                         @endphp
                         
@@ -152,8 +154,10 @@
 
                         <div class="productos-lista">
                             Ingredientes: 
-                            @foreach($menu->plato->productos as $producto)
-                                {{ $producto->nombre }} ({{ $producto->pivot->cantidad_gramos }}g){{ !$loop->last ? ', ' : '' }}
+                            @foreach($menu->platos as $platoItem)
+                                @foreach($platoItem->productos as $producto)
+                                    {{ $producto->nombre }} ({{ $producto->pivot->cantidad_gramos }}g){{ !$loop->last || !$loop->parent->last ? ', ' : '' }}
+                                @endforeach
                             @endforeach
                         </div>
                     </div>

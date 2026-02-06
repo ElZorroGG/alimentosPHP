@@ -12,18 +12,35 @@ class Form extends Component
     public $menuId;
     public $fecha;
     public $tipo_comida;
-    public $plato_id;
+    public $plato_ids = [];
+    public $busquedaPlato = '';
 
     protected $rules = [
         'fecha' => 'required|date',
         'tipo_comida' => 'required|in:desayuno,almuerzo,comida,merienda,cena',
-        'plato_id' => 'required|exists:platos,id',
+        'plato_ids' => 'required|array|min:1',
+        'plato_ids.*' => 'exists:platos,id',
     ];
+
+    protected $messages = [
+        'plato_ids.required' => 'Debes seleccionar al menos un plato.',
+        'plato_ids.min' => 'Debes seleccionar al menos un plato.',
+    ];
+
+    public function togglePlato($id)
+    {
+        $id = (int) $id;
+        if (in_array($id, $this->plato_ids)) {
+            $this->plato_ids = array_values(array_filter($this->plato_ids, fn($v) => $v !== $id));
+        } else {
+            $this->plato_ids[] = $id;
+        }
+    }
 
     public function mount($id = null)
     {
         if ($id) {
-            $menu = Menu::findOrFail($id);
+            $menu = Menu::with('platos')->findOrFail($id);
             
             if ($menu->user_id !== auth()->id()) {
                 abort(403);
@@ -32,7 +49,7 @@ class Form extends Component
             $this->menuId = $menu->id;
             $this->fecha = $menu->fecha;
             $this->tipo_comida = $menu->tipo_comida;
-            $this->plato_id = $menu->plato_id;
+            $this->plato_ids = $menu->platos->pluck('id')->toArray();
         } else {
             // Pre-cargar desde parámetros de URL si existen
             $this->fecha = request('fecha', now()->format('Y-m-d'));
@@ -44,17 +61,24 @@ class Form extends Component
     {
         $this->validate();
 
-        // Verificar que el plato pertenezca al usuario
-        $plato = Plato::findOrFail($this->plato_id);
-        if ($plato->user_id !== auth()->id()) {
-            session()->flash('error', 'No puedes usar un plato que no te pertenece.');
+        // Verificar que todos los platos pertenezcan al usuario
+        $platos = Plato::whereIn('id', $this->plato_ids)->get();
+
+        if ($platos->count() !== count($this->plato_ids)) {
+            session()->flash('error', 'Uno o más platos seleccionados no existen.');
             return;
+        }
+
+        foreach ($platos as $plato) {
+            if ($plato->user_id !== auth()->id()) {
+                session()->flash('error', 'No puedes usar un plato que no te pertenece.');
+                return;
+            }
         }
 
         $data = [
             'fecha' => $this->fecha,
             'tipo_comida' => $this->tipo_comida,
-            'plato_id' => $this->plato_id,
             'user_id' => auth()->id(),
         ];
 
@@ -66,6 +90,7 @@ class Form extends Component
             }
 
             $menu->update($data);
+            $menu->platos()->sync($this->plato_ids);
             session()->flash('success', 'Menú actualizado correctamente.');
         } else {
             // Verificar si ya existe un menú para esa fecha y tipo de comida
@@ -75,11 +100,12 @@ class Form extends Component
                 ->first();
 
             if ($existente) {
-                session()->flash('error', 'Ya tienes un plato asignado para esta comida. Edita el existente.');
+                session()->flash('error', 'Ya tienes un menú asignado para esta comida. Edita el existente.');
                 return;
             }
 
-            Menu::create($data);
+            $menu = Menu::create($data);
+            $menu->platos()->attach($this->plato_ids);
             session()->flash('success', 'Menú creado correctamente.');
         }
 

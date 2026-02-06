@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plato extends Model
 {
@@ -23,8 +22,9 @@ class Plato extends Model
             ->withTimestamps();
     }
 
-    public function menus(): HasMany
+    public function menus(): BelongsToMany
     {
-        return $this->hasMany(Menu::class);
+        return $this->belongsToMany(Menu::class, 'menu_plato')
+            ->withTimestamps();
     }
 }

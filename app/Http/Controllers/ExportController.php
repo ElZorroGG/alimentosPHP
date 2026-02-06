@@ -17,7 +17,7 @@ class ExportController extends Controller
 
         $menus = Menu::where('user_id', auth()->id())
             ->whereBetween('fecha', [$inicio->format('Y-m-d'), $fin->format('Y-m-d')])
-            ->with('plato.productos')
+            ->with('platos.productos')
             ->orderBy('fecha')
             ->orderByRaw("FIELD(tipo_comida, 'desayuno', 'almuerzo', 'comida', 'merienda', 'cena')")
             ->get();
@@ -47,12 +47,14 @@ class ExportController extends Controller
 
             if ($menusAgrupados->has($fechaFormato)) {
                 foreach ($menusAgrupados[$fechaFormato] as $menu) {
-                    foreach ($menu->plato->productos as $producto) {
-                        $factor = $producto->pivot->cantidad_gramos / 100;
-                        $totalesDia['calorias'] += $producto->calorias * $factor;
-                        $totalesDia['proteinas'] += $producto->proteinas * $factor;
-                        $totalesDia['carbohidratos'] += $producto->carbohidratos * $factor;
-                        $totalesDia['grasas'] += $producto->grasa_total * $factor;
+                    foreach ($menu->platos as $plato) {
+                        foreach ($plato->productos as $producto) {
+                            $factor = $producto->pivot->cantidad_gramos / 100;
+                            $totalesDia['calorias'] += $producto->calorias * $factor;
+                            $totalesDia['proteinas'] += $producto->proteinas * $factor;
+                            $totalesDia['carbohidratos'] += $producto->carbohidratos * $factor;
+                            $totalesDia['grasas'] += $producto->grasa_total * $factor;
+                        }
                     }
                 }
             }

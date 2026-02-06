@@ -53,7 +53,7 @@ class Index extends Component
         // Obtener todos los menús de la semana
         $menusCollection = Menu::where('user_id', auth()->id())
             ->whereBetween('fecha', [$inicio->format('Y-m-d'), $fin->format('Y-m-d')])
-            ->with('plato.productos')
+            ->with('platos.productos')
             ->get();
         
         $menus = $menusCollection->mapWithKeys(function($menu) {

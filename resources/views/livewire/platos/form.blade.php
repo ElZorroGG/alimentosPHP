@@ -47,7 +47,7 @@
                                         <div class="flex gap-3 items-start p-4 bg-gray-50 rounded-lg">
                                             <div class="flex-1">
                                                 <label class="block text-xs text-gray-600 mb-1">Producto</label>
-                                                <select wire:model="productos.{{ $index }}.producto_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                <select wire:model.live="productos.{{ $index }}.producto_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                                     <option value="">Selecciona un producto</option>
                                                     @foreach($todosProductos as $prod)
                                                         <option value="{{ $prod->id }}">
@@ -66,7 +66,7 @@
                                             <div class="w-32">
                                                 <label class="block text-xs text-gray-600 mb-1">Gramos</label>
                                                 <input 
-                                                    wire:model="productos.{{ $index }}.cantidad_gramos" 
+                                                    wire:model.live.debounce.500ms="productos.{{ $index }}.cantidad_gramos" 
                                                     type="number" 
                                                     step="1" 
                                                     min="1"

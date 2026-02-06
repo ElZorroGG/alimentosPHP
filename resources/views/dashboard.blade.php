@@ -26,7 +26,7 @@
                 $hoy = now()->format('Y-m-d');
                 $menusHoy = \App\Models\Menu::where('user_id', auth()->id())
                     ->where('fecha', $hoy)
-                    ->with('plato.productos')
+                    ->with('platos.productos')
                     ->get();
                 
                 $totalesHoy = [
@@ -37,12 +37,14 @@
                 ];
                 
                 foreach($menusHoy as $menu) {
-                    foreach($menu->plato->productos as $producto) {
-                        $factor = $producto->pivot->cantidad_gramos / 100;
-                        $totalesHoy['calorias'] += $producto->calorias * $factor;
-                        $totalesHoy['proteinas'] += $producto->proteinas * $factor;
-                        $totalesHoy['carbohidratos'] += $producto->carbohidratos * $factor;
-                        $totalesHoy['grasas'] += $producto->grasa_total * $factor;
+                    foreach($menu->platos as $platoItem) {
+                        foreach($platoItem->productos as $producto) {
+                            $factor = $producto->pivot->cantidad_gramos / 100;
+                            $totalesHoy['calorias'] += $producto->calorias * $factor;
+                            $totalesHoy['proteinas'] += $producto->proteinas * $factor;
+                            $totalesHoy['carbohidratos'] += $producto->carbohidratos * $factor;
+                            $totalesHoy['grasas'] += $producto->grasa_total * $factor;
+                        }
                     }
                 }
 
@@ -58,7 +60,7 @@
                 
                 $menusSemana = \App\Models\Menu::where('user_id', auth()->id())
                     ->whereBetween('fecha', [$inicioSemana, $finSemana])
-                    ->with('plato.productos')
+                    ->with('platos.productos')
                     ->get();
                 
                 $totalesSemana = [
@@ -69,12 +71,14 @@
                 ];
                 
                 foreach($menusSemana as $menu) {
-                    foreach($menu->plato->productos as $producto) {
-                        $factor = $producto->pivot->cantidad_gramos / 100;
-                        $totalesSemana['calorias'] += $producto->calorias * $factor;
-                        $totalesSemana['proteinas'] += $producto->proteinas * $factor;
-                        $totalesSemana['carbohidratos'] += $producto->carbohidratos * $factor;
-                        $totalesSemana['grasas'] += $producto->grasa_total * $factor;
+                    foreach($menu->platos as $platoItem) {
+                        foreach($platoItem->productos as $producto) {
+                            $factor = $producto->pivot->cantidad_gramos / 100;
+                            $totalesSemana['calorias'] += $producto->calorias * $factor;
+                            $totalesSemana['proteinas'] += $producto->proteinas * $factor;
+                            $totalesSemana['carbohidratos'] += $producto->carbohidratos * $factor;
+                            $totalesSemana['grasas'] += $producto->grasa_total * $factor;
+                        }
                     }
                 }
 
@@ -88,6 +92,7 @@
                 $totalPlatos = \App\Models\Plato::where('user_id', auth()->id())->count();
                 $totalProductosPersonales = \App\Models\Producto::where('user_id', auth()->id())->count();
                 $totalMenus = \App\Models\Menu::where('user_id', auth()->id())->count();
+                $totalProductosBedca = \App\Models\Producto::whereNull('user_id')->count();
             @endphp
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -118,7 +123,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm text-gray-600 mb-1">Productos BEDCA</div>
-                        <div class="text-3xl font-bold text-gray-900">210</div>
+                        <div class="text-3xl font-bold text-gray-900">{{ $totalProductosBedca }}</div>
                         <a href="{{ route('productos.index') }}" class="text-sm text-blue-600 hover:text-blue-800">Explorar →</a>
                     </div>
                 </div>
@@ -189,13 +194,17 @@
                                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
                                         <div>
                                             <div class="font-semibold">{{ ucfirst($menu->tipo_comida) }}</div>
-                                            <div class="text-sm text-gray-600">{{ $menu->plato->nombre }}</div>
+                                            <div class="text-sm text-gray-600">
+                                                {{ $menu->platos->pluck('nombre')->join(', ') }}
+                                            </div>
                                         </div>
                                         <div class="text-sm text-gray-700">
                                             @php
                                                 $caloriasComida = 0;
-                                                foreach($menu->plato->productos as $producto) {
-                                                    $caloriasComida += ($producto->calorias / 100) * $producto->pivot->cantidad_gramos;
+                                                foreach($menu->platos as $platoItem) {
+                                                    foreach($platoItem->productos as $producto) {
+                                                        $caloriasComida += ($producto->calorias / 100) * $producto->pivot->cantidad_gramos;
+                                                    }
                                                 }
                                             @endphp
                                             {{ number_format($caloriasComida, 0) }} kcal

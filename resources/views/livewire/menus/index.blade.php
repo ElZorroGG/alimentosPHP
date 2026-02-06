@@ -70,9 +70,11 @@
                                                 $menu = $menus->get($clave);
                                             @endphp
                                             <td class="border border-gray-300 px-2 py-2 text-center align-top {{ $dia['esHoy'] ? 'bg-blue-50' : '' }}">
-                                                @if($menu && $menu->plato)
+                                                @if($menu && $menu->platos->count() > 0)
                                                     <div class="bg-green-100 rounded p-2 text-xs">
-                                                        <div class="font-semibold mb-1">{{ $menu->plato->nombre }}</div>
+                                                        @foreach($menu->platos as $platoItem)
+                                                            <div class="font-semibold mb-1">{{ $platoItem->nombre }}</div>
+                                                        @endforeach
                                                         @php
                                                             $totales = [
                                                                 'calorias' => 0,
@@ -80,12 +82,14 @@
                                                                 'carbohidratos' => 0,
                                                                 'grasas' => 0,
                                                             ];
-                                                            foreach($menu->plato->productos as $producto) {
-                                                                $factor = $producto->pivot->cantidad_gramos / 100;
-                                                                $totales['calorias'] += $producto->calorias * $factor;
-                                                                $totales['proteinas'] += $producto->proteinas * $factor;
-                                                                $totales['carbohidratos'] += $producto->carbohidratos * $factor;
-                                                                $totales['grasas'] += $producto->grasa_total * $factor;
+                                                            foreach($menu->platos as $platoItem) {
+                                                                foreach($platoItem->productos as $producto) {
+                                                                    $factor = $producto->pivot->cantidad_gramos / 100;
+                                                                    $totales['calorias'] += $producto->calorias * $factor;
+                                                                    $totales['proteinas'] += $producto->proteinas * $factor;
+                                                                    $totales['carbohidratos'] += $producto->carbohidratos * $factor;
+                                                                    $totales['grasas'] += $producto->grasa_total * $factor;
+                                                                }
                                                             }
                                                         @endphp
                                                         <div class="text-gray-600">
@@ -133,13 +137,15 @@
                                     foreach($tiposComida as $tipo) {
                                         $clave = $dia['fecha'] . '-' . $tipo;
                                         $menu = $menus->get($clave);
-                                        if ($menu && $menu->plato) {
-                                            foreach($menu->plato->productos as $producto) {
-                                                $factor = $producto->pivot->cantidad_gramos / 100;
-                                                $totalDia['calorias'] += $producto->calorias * $factor;
-                                                $totalDia['proteinas'] += $producto->proteinas * $factor;
-                                                $totalDia['carbohidratos'] += $producto->carbohidratos * $factor;
-                                                $totalDia['grasas'] += $producto->grasa_total * $factor;
+                                        if ($menu && $menu->platos->count() > 0) {
+                                            foreach($menu->platos as $platoItem) {
+                                                foreach($platoItem->productos as $producto) {
+                                                    $factor = $producto->pivot->cantidad_gramos / 100;
+                                                    $totalDia['calorias'] += $producto->calorias * $factor;
+                                                    $totalDia['proteinas'] += $producto->proteinas * $factor;
+                                                    $totalDia['carbohidratos'] += $producto->carbohidratos * $factor;
+                                                    $totalDia['grasas'] += $producto->grasa_total * $factor;
+                                                }
                                             }
                                         }
                                     }
